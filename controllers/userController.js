@@ -13,7 +13,7 @@ const nodemailer= require("nodemailer");
 const randomstring= require("randomstring");
 
 
-/*
+
 const create_token= async(id) =>{
 
     try{
@@ -140,7 +140,7 @@ const register_user= async(req, res) =>{
          res.status(400).send(error.message);
      }
  }
-*/
+
 
 // get all data
 const getdetail = async (req, res) => {
@@ -362,9 +362,9 @@ module.exports = {
     insertproduct,
     updateproduct,
     deleteproduct,
-    getimage
+    getimage,
     // getimagebyid,
-    // register_user,
-    // user_login
+     register_user,
+     user_login
 
 }

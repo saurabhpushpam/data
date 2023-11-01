@@ -43,8 +43,8 @@ const upload= multer({storage: storage});
 
 get_route.get('/get-data', user_controller.getdetail);
 get_route.get('/get-databyid/:id', user_controller.getdetailbyid);
-//get_route.post('/register', user_controller.register_user);
-//get_route.post('/login', user_controller.user_login);
+get_route.post('/register', user_controller.register_user);
+get_route.post('/login', user_controller.user_login);
 get_route.post('/post-data', upload.single('images'), user_controller.insertproduct);
 get_route.post('/update', upload.single('images'), user_controller.updateproduct);
 get_route.post('/delete/:id',  user_controller.deleteproduct);
