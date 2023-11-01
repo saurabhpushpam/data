@@ -260,7 +260,7 @@ const updateproduct = async (req, res) => {
 
             const userData = await userproduct.findByIdAndUpdate({ _id: id }, {
                 $set: {
-                    title: title, description: description, price: price, images: images
+                    title: title, description: description, images: images
                 }
             });
 
