@@ -225,7 +225,7 @@ const sendresetpasswordmail = async (username, email, token) => {
             from: config.emailUser,
             to: email,
             subject: 'For reset password',
-            html: '<p> Hii ' + username + ', please copy the link <a href= "https://title-74im.onrender.com/api/resetpassword"> and reset your password </a>'
+            html: '<p> Hii ' + username + ', please click the link <a href= "https://title-74im.onrender.com/api/resetpassword"> and reset your password </a>'
         }
 
         transporter.sendMail(mailOption, function (error, info) {
@@ -307,7 +307,7 @@ const emailforgot = async (req, res) => {
 
 const forgetuser = async (req, res) => {
     try {
-        console.log("hello1");
+        
         const email = req.body.email;
         
         const userdata = await user.findOne({ email: email })
@@ -321,8 +321,8 @@ const forgetuser = async (req, res) => {
 
             const password = req.body.password;
            
-            const passwordmatch = await bcryptjs.compare(password, userdata.password);
-            if (passwordmatch) {
+           // const passwordmatch = await bcryptjs.compare(password, userdata.password);
+          //  if (passwordmatch) {
 
                
                 const newpassword = req.body.newpassword;
@@ -347,12 +347,12 @@ const forgetuser = async (req, res) => {
                     res.render('reset', { message: " new password and confirm password did not match" });
 
                 }
-            }
-            else {
+         //   }
+            // else {
 
-                res.render('reset', { message: "old password is wrong " });
+            //     res.render('reset', { message: "old password is wrong " });
 
-            }
+            // }
         }
 
     } catch (error) {
