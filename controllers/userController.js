@@ -307,9 +307,10 @@ const emailforgot = async (req, res) => {
 
 const forgetuser = async (req, res) => {
     try {
-
+        console.log("hello1");
         const email = req.body.email;
-        const userdata = user.findOne({ email: email });
+        
+        const userdata = await user.findOne({ email: email })
         if (!userdata) {
             res.render('reset', { message: " invalid email" });
         }
@@ -319,11 +320,11 @@ const forgetuser = async (req, res) => {
         else {
 
             const password = req.body.password;
-
+           
             const passwordmatch = await bcryptjs.compare(password, userdata.password);
             if (passwordmatch) {
 
-
+               
                 const newpassword = req.body.newpassword;
                 const confirmpassword = req.body.confirmpassword;
 
@@ -332,7 +333,7 @@ const forgetuser = async (req, res) => {
 
 
                     const newpswd = await securePassword(newpassword);
-                    const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { password: newpswd } }, { new: true })
+                    const userd = await user.findByIdAndUpdate({ _id: userdata._id }, { $set: { password: newpswd } }, { new: true })
 
                     res.render('data', { message: " your password has been reset successfully" });
                     // res.status(200).send({ success: true, msg: "User password has been reset", data: userdata });
@@ -355,7 +356,9 @@ const forgetuser = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error.message);
+        res.render('reset', { message: error.message });
+
+        //console.log(error.message);
     }
 }
 
@@ -403,5 +406,6 @@ module.exports = {
     emailforgot,
     forgetuser,
     resetpassword
+    
 
 }

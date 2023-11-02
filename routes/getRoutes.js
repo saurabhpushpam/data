@@ -63,7 +63,7 @@ get_route.post('/forget', user_controller.forget_password);
 //review_routes.post('/updatereview', ratecontroller.updatereviewp);
 
 get_route.get('/resetpassword', user_controller.emailforgot);
-
+//get_route.post('/resetpassword', user_controller.e);
 get_route.post('/resetpassword', user_controller.forgetuser);
 
 
