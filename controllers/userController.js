@@ -326,7 +326,27 @@ const getimage = async (req, res) => {
     }
 }
 
+const getuser= async(req, res) => {
+    try {
+        
+        const data = await user.find();
+        const formattedData = data.map(item => ({
 
+            id: item._id,
+            name: item.name,
+            email: item.email,
+            phone: item.phone,
+            password: item.password,
+            type: item.type
+
+        }));
+
+        // Send the formatted data as the response
+        res.status(200).json(formattedData);
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+}
 /*
 // get image by id
 const getimagebyid = async (req, res) => {
@@ -365,6 +385,7 @@ module.exports = {
     getimage,
     // getimagebyid,
      register_user,
-     user_login
+     user_login,
+     getuser
 
 }
