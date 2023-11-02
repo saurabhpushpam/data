@@ -1,6 +1,7 @@
 const config= {
-    secret_jwt: "thisismysecretkey"
-   
+    secret_jwt: "thisismysecretkey",
+    emailUser: 'spuspam111@gmail.com',
+    emailPassword: 'nxrh cjsb stsu hrar'
 
 }
 

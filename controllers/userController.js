@@ -2,112 +2,112 @@ const userproduct = require("../models/productModel");
 const user = require("../models/userModel");
 const path = require("path");
 const fs = require("fs");
-const bcryptjs= require('bcryptjs');
+const bcryptjs = require('bcryptjs');
 
-const config= require("../config/config");
+const config = require("../config/config");
 
-const jwt= require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
-const nodemailer= require("nodemailer");
+const nodemailer = require("nodemailer");
 
-const randomstring= require("randomstring");
+const randomstring = require("randomstring");
 
 
 
-const create_token= async(id) =>{
+const create_token = async (id) => {
 
-    try{
+    try {
 
-        const token= await jwt.sign({_id:id }, config.secret_jwt);
+        const token = await jwt.sign({ _id: id }, config.secret_jwt);
         return token;
 
     }
-    catch(error){
-    res.status(400).send(error.message);
+    catch (error) {
+        res.status(400).send(error.message);
     }
 }
 
-const securePassword= async (password) => {
-    try{
-        const passwordHash= await bcryptjs.hash(password, 10);
+const securePassword = async (password) => {
+    try {
+        const passwordHash = await bcryptjs.hash(password, 10);
         return passwordHash;
     }
-     catch (error) {
-       
+    catch (error) {
+
         res.status(400).send(error.message);
 
-     }
+    }
 }
 
-const register_user= async(req, res) =>{
+const register_user = async (req, res) => {
 
 
-    try{  
+    try {
 
-        const spassword= await securePassword(req.body.password);
+        const spassword = await securePassword(req.body.password);
 
-        const users= new user({
-             name: req.body.name,
-             email: req.body.email,
-             phone: req.body.phone,
-             password: spassword,
-             type: req.body.type
+        const users = new user({
+            name: req.body.name,
+            email: req.body.email,
+            phone: req.body.phone,
+            password: spassword,
+            type: req.body.type
 
 
-         
 
-           // password: req.body.password,
-            
-            
+
+            // password: req.body.password,
+
+
 
         });
 
 
 
-         const userData= await user.findOne({email: req.body.email});
-         if(userData){
-             res.status(200).send({success: false, msg: "This email is already exist"});
+        const userData = await user.findOne({ email: req.body.email });
+        if (userData) {
+            res.status(200).send({ success: false, msg: "This email is already exist" });
 
-         }
-         else{
-             const user_data= await users.save();
-             res.status(200).send({success: true, data: user_data});
-         }
+        }
+        else {
+            const user_data = await users.save();
+            res.status(200).send({ success: true, data: user_data });
+        }
 
     }
 
     catch (error) {
-        
-       
+
+
         res.status(400).send(error.message);
     }
 }
 
 //login Method
 
- const user_login= async(req, res) => {
-     try{
+const user_login = async (req, res) => {
+    try {
 
-         const email= req.body.email;
-         const password= req.body.password;
+        const email = req.body.email;
+        const password = req.body.password;
 
 
-         const userData= await user.findOne({email: email});
+        const userData = await user.findOne({ email: email });
 
-         if(userData){
+        if (userData) {
 
             // compare() is a function of bcryptjs, in that function we compare 2 values
             // first value "password" which user pass at the time of login
             // and second value "userData.password" means the original password stored in database
 
-            const passwordmatch= await bcryptjs.compare(password, userData.password);
+            const passwordmatch = await bcryptjs.compare(password, userData.password);
 
-            if(passwordmatch){
+            if (passwordmatch) {
 
-                const tokenData= await create_token(userData._id);
+                const tokenData = await create_token(userData._id);
 
 
-                const userResult= {
+                const userResult = {
                     _id: userData._id,
                     name: userData.name,
                     email: userData.email,
@@ -115,10 +115,10 @@ const register_user= async(req, res) =>{
                     phone: userData.phone,
                     type: userData.type,
                     token: tokenData
-                    
+
                 }
 
-                const response= {
+                const response = {
                     success: true,
                     msg: "User Details",
                     data: userResult
@@ -127,208 +127,24 @@ const register_user= async(req, res) =>{
                 res.status(200).send(response);
 
             }
-            else{
-                res.status(200).send({success: false, msg:"login details are incorrect"});
+            else {
+                res.status(200).send({ success: false, msg: "login details are incorrect" });
             }
 
-         }
-         else{
-            res.status(200).send({success: false, msg:"login details are incorrect"});
-         }
-     }
-     catch (error){
-         res.status(400).send(error.message);
-     }
- }
-
-
-// get all data
-const getdetail = async (req, res) => {
-
-    try {
-
-        const data = await userproduct.find();
-        const formattedData = data.map(item => ({
-
-            id: item._id,
-            title: item.title,
-            description: item.description,
-           // price: item.price,
-            image: item.images,
-         //   imagePath: path.join(__dirname, '..', 'public/productImages', item.images) // Construct complete local image path
-
-        }));
-
-        // Send the formatted data as the response
-        res.status(200).json(formattedData);
-
-
-        //  res.status(200).send({success: true, msg: "All details :", data: data});
-
-    } catch (error) {
-        res.status(400).send(error.message);
-    }
-
-}
-
-
-// get data by id
-const getdetailbyid = async (req, res) => {
-    try {
-
-        //const id= req.body.id;
-        const id = req.params.id;
-
-        const data = await userproduct.findOne({ _id: id });
-
-        if (data) {
-
-            /*
-                       const getImagePath = (imageName) => {
-                           // Construct the path to the image in the 'public/images' directory
-                           const imagePath = path.join(__dirname, '..', 'public', 'productImages', imageName);
-                           return imagePath;
-                       };
-           
-                       const imageName = data.images;
-                       const imagePath = getImagePath(imageName);
-                       const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' });
-           
-                       const responseData = {
-                           id: data._id,
-                           title: data.title,
-                           description: data.description,
-                           price: data.price,
-                           images: data.images,
-                           imagePath: imagePath,
-                         //  image_Base64: `data:image/png;base64, ${imageBase64}`
-                       };
-           
-                       res.json(responseData);
-           */
-
-       //     const imageName = data.images;
-       //     const imagePath = path.join(__dirname, '..', 'public/productImages', imageName);
-            res.status(200).send({ success: true, msg: "product details :", data: { data } });
-
-        } else {
-            res.status(200).send({ success: false, msg: "id not found!" });
         }
-
-    } catch (error) {
-        res.status(400).send(error.message);
+        else {
+            res.status(200).send({ success: false, msg: "login details are incorrect" });
+        }
     }
-}
-
-
-// insert data
-const insertproduct = async (req, res) => {
-
-    try {
-
-        const getdata = new userproduct({
-            title: req.body.title,
-            description: req.body.description,
-          //  price: req.body.price,
-            images: req.file.filename,
-        });
-        const product_data = await getdata.save();
-
-        res.status(200).send({ success: true, msg: "product Details", data: product_data })
-
-    }
-
     catch (error) {
-        res.status(400).send({ success: false, msg: error.message });
-    }
-}
-
-
-// update data
-const updateproduct = async (req, res) => {
-    try {
-
-        const id = req.body.id;
-        const title = req.body.title;
-        const description = req.body.description;
-     //   const price = req.body.price;
-        const images = req.file.filename;
-
-        const data = await userproduct.findOne({ _id: id });
-
-        if (data) {
-
-            const userData = await userproduct.findByIdAndUpdate({ _id: id }, {
-                $set: {
-                    title: title, description: description, images: images
-                }
-            });
-
-            res.status(200).send({ success: true, msg: "your data has been updated" });
-
-        } else {
-            res.status(200).send({ success: false, msg: "id not found!" });
-        }
-
-    } catch (error) {
         res.status(400).send(error.message);
     }
 }
 
 
-// delete data
-const deleteproduct = async (req, res) => {
+const getuser = async (req, res) => {
     try {
 
-        // const id= req.body.id;
-        const id = req.params.id;
-
-
-        const data = await userproduct.findOne({ _id: id });
-
-        if (data) {
-
-            const userData = await userproduct.deleteOne({ _id: id });
-
-            res.status(200).send({ success: true, msg: "your data has been deleted" });
-
-        } else {
-            res.status(200).send({ success: false, msg: "id not found!" });
-        }
-
-    } catch (error) {
-        res.status(400).send(error.message);
-    }
-}
-
-
-// get image by imagename
-
-const getimage = async (req, res) => {
-    try {
-
-        const image = req.params.image;
-
-
-        const getImagePath = (imageName) => {
-            // Construct the path to the image in the 'public/images' directory
-            const imagePath = path.join(__dirname, '..', 'public', 'productImages', imageName);
-            return imagePath;
-        };
-
-        const imageName = image;
-        const imagePath = getImagePath(imageName);
-        res.sendFile(imagePath);
-
-
-    } catch (error) {
-        res.status(400).send(error.message);
-    }
-}
-
-const getuser= async(req, res) => {
-    try {
-        
         const data = await user.find();
         const formattedData = data.map(item => ({
 
@@ -347,45 +163,245 @@ const getuser= async(req, res) => {
         res.status(400).send(error.message);
     }
 }
-/*
-// get image by id
-const getimagebyid = async (req, res) => {
+
+
+const resetpassword = async (req, res) => {
     try {
 
-        const id = req.params.id;
-        const data = await userproduct.findOne({ _id: id });
-        if (data) {
-            const image = data.images;
+        const token = req.query.token;
+        const tokenData = await user.findOne({ token: token });
 
-            const getImagePath = (imageName) => {
-                // Construct the path to the image in the 'public/images' directory
-                const imagePath = path.join(__dirname, '..', 'public', 'productImages', imageName);
-                return imagePath;
-            };
+        if (tokenData) {
 
+            const password = req.body.password;
+            //  const oldpassword = tokenData.password;
 
-            const imageName = image;
-            const imagePath = getImagePath(imageName);
-            res.sendFile(imagePath);
+            const passwordmatch = await bcryptjs.compare(password, tokenData.password);
+            if (passwordmatch) {
+                const new_password = req.body.newpassword;
+                const confirmpassword = req.body.confirmpassword;
+                if (new_password === confirmpassword) {
+                    const newpassword = await securePassword(new_password);
+                    const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { password: newpassword } }, { new: true })
+
+                    res.status(200).send({ success: true, msg: "User password has been reset", data: userdata });
+                }
+                else {
+                    res.status(200).send({ success: true, msg: "new_password and confirm_password didn't match" });
+                }
+
+            }
+            else {
+                res.status(200).send({ success: true, msg: "password is wrong" });
+            }
         }
+
+        else {
+            res.status(200).send({ success: true, msg: "invalid token" });
+        }
+
     } catch (error) {
         res.status(400).send(error.message);
     }
 }
 
+
+
+const sendresetpasswordmail = async (username, email, token) => {
+
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: config.emailUser,
+                pass: config.emailPassword
+            }
+        });
+
+        const mailOption = {
+            from: config.emailUser,
+            to: email,
+            subject: 'For reset password',
+            html: '<p> Hii ' + username + ', please copy the link <a href= "http://localhost:8000/api/resetpassword"> and reset your password </a>'
+        }
+
+        transporter.sendMail(mailOption, function (error, info) {
+            if (error) {
+                console.log(error);
+
+            }
+            else {
+                console.log("Mail has been sent : ", info.response);
+            }
+        });
+
+
+
+    } catch (error) {
+        res.status(400).send({ success: false, msg: error.message });
+    }
+}
+
+const forget_password = async (req, res) => {
+
+    try {
+        const email = req.body.email;
+        const userData = await user.findOne({ email: email });
+        if (userData) {
+
+            const Randomstring = randomstring.generate();
+            const data = await user.updateOne({ email: email }, { $set: { token: Randomstring } });
+            sendresetpasswordmail(userData.name, userData.email, Randomstring);
+            res.status(200).send({ success: true, msg: "Please check your inbox of email and reset your password" })
+
+        }
+        else {
+
+            res.status(200).send({ success: true, msg: "This email does not exist" });
+
+        }
+
+    } catch (error) {
+
+        res.status(200).send({ success: false, msg: error.message });
+
+    }
+
+}
+/*
+// reset password
+
+const reset_password = async (req, res) => {
+    try {
+        const token = req.query.token;
+        const tokenData = await user.findOne({ token: token });
+
+        if (tokenData) {
+            const password = req.body.password;
+            const newpassword = await securePassword(password);
+            const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { password: newpassword, token: '' } }, { new: true })
+
+            res.status(200).send({ success: true, msg: "User password has been reset", data: userdata })
+        } else {
+            res.status(200).send({ success: true, msg: "This link is invalid" });
+        }
+
+    } catch (error) {
+        res.status(200).send({ success: false, msg: error.message });
+    }
+}
 */
 
 
+// this will open reset.ejs file on browser
+const emailforgot = async (req, res) => {
+    try {
+        res.render('reset');
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+const forgetuser = async (req, res) => {
+    try {
+
+        const email = req.body.email;
+        const userdata = user.findOne({ email: email });
+        if (!userdata) {
+            res.render('reset', { message: " invalid email" });
+        }
+
+
+
+        else {
+
+            const password = req.body.password;
+
+            const passwordmatch = await bcryptjs.compare(password, userdata.password);
+            if (passwordmatch) {
+
+
+                const newpassword = req.body.newpassword;
+                const confirmpassword = req.body.confirmpassword;
+
+
+                if (newpassword === confirmpassword) {
+
+
+                    const newpswd = await securePassword(newpassword);
+                    const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { password: newpswd } }, { new: true })
+
+                    res.render('data', { message: " your password has been reset successfully" });
+                    // res.status(200).send({ success: true, msg: "User password has been reset", data: userdata });
+
+
+                    }
+                
+
+                else {
+
+                    res.render('reset', { message: " new password and confirm password did not match" });
+
+                }
+            }
+            else {
+
+                res.render('reset', { message: "old password is wrong " });
+
+            }
+        }
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+
+
+/*
+const fogetuser = async (req, res) => {
+    try {
+
+        const spassword = await securepassword(req.body.password);
+
+        const user = new userregister({
+            name: req.body.name,
+            email: req.body.email,
+            mobile: req.body.mno,
+            image: req.file.filename,
+            password: spassword,
+            is_admin: 0
+
+        });
+
+        const userdata = await user.save();
+
+        if (userdata) {
+            res.render('data', { message: " your password has been reset successfully " });
+
+        }
+        else {
+            res.render('reset', { message: " your reset password has been failed" });
+        }
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+*/
+
 module.exports = {
-    getdetail,
-    getdetailbyid,
-    insertproduct,
-    updateproduct,
-    deleteproduct,
-    getimage,
-    // getimagebyid,
-     register_user,
-     user_login,
-     getuser
+
+    register_user,
+    user_login,
+    getuser,
+    forget_password,
+    //reset_password,
+    emailforgot,
+    forgetuser,
+    resetpassword
 
 }

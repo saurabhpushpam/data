@@ -2,6 +2,12 @@ const express= require("express");
 const get_route= express();
 
 const user_controller= require("../controllers/userController");
+const product_controller= require("../controllers/productController");
+
+
+get_route.set('view engine', 'ejs');
+get_route.set('views', "./views/users");
+//get_route.set('views', __dirname + '/views/users');
 
 const bodyParser= require("body-parser");
 get_route.use(bodyParser.json());
@@ -41,16 +47,24 @@ const storage= multer.diskStorage({
 
 const upload= multer({storage: storage});
 
-get_route.get('/get-data', user_controller.getdetail);
-get_route.get('/get-databyid/:id', user_controller.getdetailbyid);
+get_route.get('/get-data', product_controller.getdetail);
+get_route.get('/get-databyid/:id', product_controller.getdetailbyid);
 get_route.post('/register', user_controller.register_user);
 get_route.post('/login', user_controller.user_login);
-get_route.post('/post-data', upload.single('images'), user_controller.insertproduct);
-get_route.post('/update', upload.single('images'), user_controller.updateproduct);
-get_route.post('/delete/:id',  user_controller.deleteproduct);
-get_route.get('/get-image/:image', user_controller.getimage);
+get_route.post('/post-data', upload.single('images'), product_controller.insertproduct);
+get_route.post('/update', upload.single('images'), product_controller.updateproduct);
+get_route.post('/delete/:id',  product_controller.deleteproduct);
+get_route.get('/get-image/:image', product_controller.getimage);
 get_route.get('/getuser', user_controller.getuser);
+get_route.post('/reset', auth, user_controller.resetpassword);
+get_route.post('/forget', user_controller.forget_password);
 //get_route.get('/get-imagebyid/:id', auth, user_controller.getimagebyid);
+
+//review_routes.post('/updatereview', ratecontroller.updatereviewp);
+
+get_route.get('/resetpassword', user_controller.emailforgot);
+
+get_route.post('/resetpassword', user_controller.forgetuser);
 
 
 module.exports= get_route;
