@@ -107,7 +107,7 @@ const user_login = async (req, res) => {
                 const tokenData = await create_token(userData._id);
                 const id= await userData._id;
                 const savetoken = await user.updateOne({ _id: id }, { $push: { tokens: tokenData } });
-                
+
 
                 const userResult = {
                     _id: userData._id,
@@ -399,6 +399,37 @@ const fogetuser = async (req, res) => {
 }
 */
 
+
+
+const logout = async (req, res) => {
+    try {
+
+        const token = req.params.token;
+      //  const token= req.query.token;
+       
+        const tokenData = await user.findOne({ tokens: token });
+    
+        if (tokenData) {
+
+            
+                    const newtoken= [];
+                    const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { tokens: newtoken } }, { new: true })
+
+                    res.status(200).send({ success: true, msg: "Logout Successfully"});
+                }
+                else {
+                    res.status(200).send({ success: true, msg: "Invalid token" });
+                }
+          //      const foundDocuments = await DataModel.find({ name: value });
+            }
+           
+
+     catch (error) {
+        res.status(400).send(error.message);
+    }
+}
+
+
 module.exports = {
 
     register_user,
@@ -408,7 +439,8 @@ module.exports = {
     //reset_password,
     emailforgot,
     forgetuser,
-    resetpassword
+    resetpassword,
+    logout
     
 
 }

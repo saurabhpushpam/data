@@ -51,6 +51,7 @@ get_route.get('/get-data', product_controller.getdetail);
 get_route.get('/get-databyid/:id', product_controller.getdetailbyid);
 get_route.post('/register', user_controller.register_user);
 get_route.post('/login', user_controller.user_login);
+get_route.post('/logout/:token', auth, user_controller.logout);
 get_route.post('/post-data', upload.single('images'), product_controller.insertproduct);
 get_route.post('/update', upload.single('images'), product_controller.updateproduct);
 get_route.post('/delete/:id',  product_controller.deleteproduct);
