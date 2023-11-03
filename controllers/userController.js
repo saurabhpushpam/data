@@ -105,7 +105,9 @@ const user_login = async (req, res) => {
             if (passwordmatch) {
 
                 const tokenData = await create_token(userData._id);
-
+                const id= await userData._id;
+                const savetoken = await user.updateOne({ _id: id }, { $push: { tokens: tokenData } });
+                
 
                 const userResult = {
                     _id: userData._id,
@@ -168,8 +170,9 @@ const getuser = async (req, res) => {
 const resetpassword = async (req, res) => {
     try {
 
-        const token = req.query.token;
-        const tokenData = await user.findOne({ token: token });
+        //const token = req.query.token;
+        const token = req.params.token;
+        const tokenData = await user.findOne({ tokens: token });
 
         if (tokenData) {
 
@@ -319,7 +322,7 @@ const forgetuser = async (req, res) => {
 
         else {
 
-            const password = req.body.password;
+           // const password = req.body.password;
            
            // const passwordmatch = await bcryptjs.compare(password, userdata.password);
           //  if (passwordmatch) {

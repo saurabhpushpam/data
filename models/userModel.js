@@ -23,10 +23,10 @@ const userSchema= mongoose.Schema({
         required: true
     },
 
-    // token:{
-    //     type: String,
+     tokens:{
+         type: Array,
     //     default: ''
-    // }
+     }
 
     
 });
