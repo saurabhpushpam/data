@@ -105,7 +105,7 @@ const user_login = async (req, res) => {
             if (passwordmatch) {
 
                 const tokenData = await create_token(userData._id);
-                const id= await userData._id;
+                const id = await userData._id;
                 const savetoken = await user.updateOne({ _id: id }, { $push: { tokens: tokenData } });
 
 
@@ -310,9 +310,9 @@ const emailforgot = async (req, res) => {
 
 const forgetuser = async (req, res) => {
     try {
-        
+
         const email = req.body.email;
-        
+
         const userdata = await user.findOne({ email: email })
         if (!userdata) {
             res.render('reset', { message: " invalid email" });
@@ -322,35 +322,35 @@ const forgetuser = async (req, res) => {
 
         else {
 
-           // const password = req.body.password;
-           
-           // const passwordmatch = await bcryptjs.compare(password, userdata.password);
-          //  if (passwordmatch) {
+            // const password = req.body.password;
 
-               
-                const newpassword = req.body.newpassword;
-                const confirmpassword = req.body.confirmpassword;
+            // const passwordmatch = await bcryptjs.compare(password, userdata.password);
+            //  if (passwordmatch) {
 
 
-                if (newpassword === confirmpassword) {
+            const newpassword = req.body.newpassword;
+            const confirmpassword = req.body.confirmpassword;
 
 
-                    const newpswd = await securePassword(newpassword);
-                    const userd = await user.findByIdAndUpdate({ _id: userdata._id }, { $set: { password: newpswd } }, { new: true })
-
-                    res.render('data', { message: " your password has been reset successfully" });
-                    // res.status(200).send({ success: true, msg: "User password has been reset", data: userdata });
+            if (newpassword === confirmpassword) {
 
 
-                    }
-                
+                const newpswd = await securePassword(newpassword);
+                const userd = await user.findByIdAndUpdate({ _id: userdata._id }, { $set: { password: newpswd } }, { new: true })
 
-                else {
+                res.render('data', { message: " your password has been reset successfully" });
+                // res.status(200).send({ success: true, msg: "User password has been reset", data: userdata });
 
-                    res.render('reset', { message: " new password and confirm password did not match" });
 
-                }
-         //   }
+            }
+
+
+            else {
+
+                res.render('reset', { message: " new password and confirm password did not match" });
+
+            }
+            //   }
             // else {
 
             //     res.render('reset', { message: "old password is wrong " });
@@ -400,34 +400,69 @@ const fogetuser = async (req, res) => {
 */
 
 
-
+// logout from all device
 const logout = async (req, res) => {
     try {
 
         const token = req.params.token;
-      //  const token= req.query.token;
-       
+        //  const token= req.query.token;
+
         const tokenData = await user.findOne({ tokens: token });
-    
+
         if (tokenData) {
 
-            
-                    const newtoken= [];
-                    const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { tokens: newtoken } }, { new: true })
 
-                    res.status(200).send({ success: true, msg: "Logout Successfully"});
-                }
-                else {
-                    res.status(200).send({ success: true, msg: "Invalid token" });
-                }
-          //      const foundDocuments = await DataModel.find({ name: value });
-            }
-           
+            const newtoken = [];
+            const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { tokens: newtoken } }, { new: true })
 
-     catch (error) {
+            res.status(200).send({ success: true, msg: "Logout Successfully" });
+        }
+        else {
+            res.status(200).send({ success: true, msg: "Invalid token" });
+        }
+        //      const foundDocuments = await DataModel.find({ name: value });
+    }
+
+
+    catch (error) {
         res.status(400).send(error.message);
     }
 }
+
+
+
+// logout from 1(current) device
+const logoutone = async (req, res) => {
+    try {
+
+        const token = req.params.token;
+        //  const token= req.query.token;
+
+        const tokenData = await user.findOne({ tokens: token });
+
+        if (tokenData) {
+
+            const mytoken = tokenData.tokens;
+
+            // Use the filter method to exclude the element you want to delete.
+            const newArray = mytoken.filter((item) => item !== token);
+            
+            const userdata = await user.findByIdAndUpdate({ _id: tokenData._id }, { $set: { tokens: newArray } }, { new: true })
+
+            res.status(200).send({ success: true, msg: "Logout Successfully" });
+        }
+        else {
+            res.status(200).send({ success: true, msg: "Invalid token" });
+        }
+        //      const foundDocuments = await DataModel.find({ name: value });
+    }
+
+
+    catch (error) {
+        res.status(400).send(error.message);
+    }
+}
+
 
 
 module.exports = {
@@ -440,7 +475,8 @@ module.exports = {
     emailforgot,
     forgetuser,
     resetpassword,
-    logout
-    
+    logout,
+    logoutone
+
 
 }
